@@ -21,7 +21,7 @@ Vercel / Netlify / GitHub Pages-এ আপলোড করে ব্যবহা
 
 ## তৈরি করেছেন
 
-**Wasi Al**
+**Wasi AL**
 
 ---
 
