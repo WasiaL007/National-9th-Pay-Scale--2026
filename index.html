@@ -27,13 +27,16 @@
   }
   #splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
   .splash-logo {
-    width: 108px; height: 108px; border-radius: 26px;
-    background: linear-gradient(135deg, #2dd4bf, #eab308);
+    width: 180px; height: 165px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 0 9px rgba(45,212,191,0.15), 0 10px 34px rgba(45,212,191,0.4);
     margin-bottom: 18px;
   }
-  .splash-logo img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; display: block; }
+  .splash-logo img {
+    width: 180px; height: auto;
+    max-height: 165px;
+    object-fit: contain;
+    display: block;
+  }
   .splash-live {
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(45,212,191,0.15); border: 1px solid rgba(16,185,129,0.4);
@@ -211,7 +214,7 @@
       <div class="dt-pill">🕐 <span id="splashTime">--</span></div>
     </div>
     <div class="splash-logo">
-      <img class="splash-logo-img" src="logo-pay-scale.jpg" alt="Wasi AL logo">
+      <img class="splash-logo-img" src="logo-pay-scale.png" alt="Wasi AL logo">
     </div>
     <h1>জাতীয় বেতন স্কেল ২০২৬<br>ক্যালকুলেটর</h1>
     <p class="tag">৯ম পে স্কেল অনুযায়ী Gross ও Net বেতন — GPF ও সকল ঋণ কর্তনসহ নিখুঁত হিসাব</p>
@@ -225,7 +228,7 @@
 
   <header>
     <div class="header-inner">
-      <div class="logo"><img src="logo-pay-scale.jpg" alt="Wasi AL logo"></div>
+      <div class="logo"><img src="logo-pay-scale.png" alt="Wasi AL logo"></div>
       <div class="brand">
         <h1 style="color:#fff">Wasi AL</h1>
         <p style="color:#fff">৯ম পে স্কেল ক্যালকুলেটর ২০২৬</p>
