@@ -1168,7 +1168,7 @@
       // Increase = start2015 * growthRate * stageFactor
       var increase = Math.round(steps[0] * meta.g * factor * 10) / 10;
       var newBasic = Math.round((basic + increase) * 10) / 10;
-      var hr = houseRent(newBasic, loc);
+      var hr = houseRent(basic, loc);
       var med = 1500;
       var tiffin = (grade >= 13 && grade <= 20) ? 200 : 0;
       var wash = (grade >= 13 && grade <= 20) ? 100 : 0;
