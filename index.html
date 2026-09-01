@@ -33,7 +33,7 @@
     box-shadow: 0 0 0 9px rgba(45,212,191,0.15), 0 10px 34px rgba(45,212,191,0.4);
     margin-bottom: 18px;
   }
-  .splash-logo svg { width: 64px; height: 64px; }
+  .splash-logo img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; display: block; }
   .splash-live {
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(45,212,191,0.15); border: 1px solid rgba(16,185,129,0.4);
@@ -71,11 +71,14 @@
   }
   .header-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
   .logo {
+    overflow: hidden;
     width: 40px; height: 40px; border-radius: 12px;
     background: linear-gradient(135deg, #2dd4bf, #eab308); color: #fff;
     font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center;
     box-shadow: 0 2px 6px rgba(45,212,191,0.3);
   }
+
+  .logo img { width: 60%; height: 60%; border-radius: 50%; object-fit: cover; display: block; }
   .brand h1 { font-size: 17px; font-weight: 700; color: #1e293b; }
   .brand p { font-size: 11px; color: #ca8a04; font-weight: 500; }
   .live-pill {
@@ -208,20 +211,7 @@
       <div class="dt-pill">🕐 <span id="splashTime">--</span></div>
     </div>
     <div class="splash-logo">
-      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="10" y="6" width="34" height="52" rx="6" fill="#071410"/>
-        <rect x="15" y="12" width="24" height="10" rx="2" fill="#a7f0e6"/>
-        <circle cx="19" cy="30" r="3" fill="#a7f0e6"/>
-        <circle cx="27" cy="30" r="3" fill="#a7f0e6"/>
-        <circle cx="35" cy="30" r="3" fill="#a7f0e6"/>
-        <circle cx="19" cy="39" r="3" fill="#a7f0e6"/>
-        <circle cx="27" cy="39" r="3" fill="#a7f0e6"/>
-        <circle cx="35" cy="39" r="3" fill="#a7f0e6"/>
-        <circle cx="19" cy="48" r="3" fill="#a7f0e6"/>
-        <rect x="24" y="45" width="14" height="6" rx="3" fill="#eab308"/>
-        <circle cx="48" cy="46" r="13" fill="#eab308" stroke="#071410" stroke-width="2"/>
-        <text x="48" y="51" text-anchor="middle" font-size="14" font-weight="800" fill="#071410" font-family="sans-serif">৳</text>
-      </svg>
+      <img class="splash-logo-img" src="logo-pay-scale.jpg" alt="Wasi AL logo">
     </div>
     <h1>জাতীয় বেতন স্কেল ২০২৬<br>ক্যালকুলেটর</h1>
     <p class="tag">৯ম পে স্কেল অনুযায়ী Gross ও Net বেতন — GPF ও সকল ঋণ কর্তনসহ নিখুঁত হিসাব</p>
@@ -235,21 +225,7 @@
 
   <header>
     <div class="header-inner">
-      <div class="logo"><svg viewBox="0 0 64 64" width="60%" height="60%" xmlns="http://www.w3.org/2000/svg">
-<rect x="8" y="4" width="40" height="56" rx="6" fill="#0f172a"/>
-<rect x="13" y="10" width="30" height="12" rx="3" fill="#d9f99d"/>
-<circle cx="18" cy="30" r="3.4" fill="#a3e635"/>
-<circle cx="28" cy="30" r="3.4" fill="#a3e635"/>
-<circle cx="38" cy="30" r="3.4" fill="#facc15"/>
-<circle cx="18" cy="40" r="3.4" fill="#a3e635"/>
-<circle cx="28" cy="40" r="3.4" fill="#a3e635"/>
-<circle cx="38" cy="40" r="3.4" fill="#facc15"/>
-<circle cx="18" cy="50" r="3.4" fill="#a3e635"/>
-<circle cx="28" cy="50" r="3.4" fill="#a3e635"/>
-<circle cx="38" cy="50" r="3.4" fill="#facc15"/>
-<circle cx="54" cy="14" r="8" fill="#16a34a" stroke="#f0fdf4" stroke-width="2"/>
-<text x="54" y="18" font-size="9" fill="#f0fdf4" text-anchor="middle" font-family="sans-serif" font-weight="700">৳</text>
-</svg></div>
+      <div class="logo"><img src="logo-pay-scale.jpg" alt="Wasi AL logo"></div>
       <div class="brand">
         <h1 style="color:#fff">Wasi AL</h1>
         <p style="color:#fff">৯ম পে স্কেল ক্যালকুলেটর ২০২৬</p>
