@@ -336,6 +336,18 @@
               <p class="hint">সন্তান/শিক্ষা বাবদ মাসিক ভাতা — গ্রস বেতনে যোগ হবে।</p>
             </div>
 
+            <div class="form-group">
+              <label for="festivalBonus">উৎসব ভাতা (Festival Bonus)</label>
+              <input type="number" id="festivalBonus" placeholder="৳ ০" min="0" step="1" inputmode="numeric" value="0">
+              <p class="hint">উৎসব ভাতা থাকলে যোগ করুন — গ্রস বেতনে যুক্ত হবে।</p>
+            </div>
+
+            <div class="form-group">
+              <label for="exGratia">এককালীন সাহায্য (Ex-gratia)</label>
+              <input type="number" id="exGratia" placeholder="৳ ০" min="0" step="1" inputmode="numeric" value="0">
+              <p class="hint">এককালীন আর্থিক সাহায্য থাকলে যোগ করুন — গ্রস বেতনে যুক্ত হবে।</p>
+            </div>
+
             <div class="form-group" style="margin-bottom:0">
               <label for="location">কর্মস্থলের এলাকা (Work Location)</label>
               <select id="location">
@@ -422,6 +434,8 @@
                 <div class="row"><span>বাড়ি ভাড়া ভাতা</span><span id="bd-house">৳ ০</span></div>
                 <div class="row"><span>চিকিৎসা ভাতা</span><span id="bd-medical">৳ ০</span></div>
                 <div class="row"><span>শিক্ষা ভাতা</span><span id="bd-edu">৳ ০</span></div>
+                <div class="row"><span>উৎসব ভাতা</span><span id="bd-festival">৳ ০</span></div>
+                <div class="row"><span>এককালীন সাহায্য</span><span id="bd-exgratia">৳ ০</span></div>
                 <div class="row"><span>টিফিন ভাতা</span><span id="bd-tiffin">৳ ০</span></div>
                 <div class="row"><span>ধোয়া-মোছা ভাতা</span><span id="bd-washing">৳ ০</span></div>
               </div>
@@ -647,7 +661,9 @@
     var tiffin = (grade >= 13 && grade <= 20) ? 200 : 0;
     var wash = (grade >= 13 && grade <= 20) ? 100 : 0;
     var edu = num("eduAllowance");
-    var gross = Math.round((newBasic + hr + med + tiffin + wash + edu) * 10) / 10;
+    var festival = num("festivalBonus");
+    var exgratia = num("exGratia");
+    var gross = Math.round((newBasic + hr + med + tiffin + wash + edu + festival + exgratia) * 10) / 10;
     var diff = newBasic - basic;
 
     // ===== GPF & Loan deductions =====
@@ -671,9 +687,10 @@
     document.getElementById("bd-house").textContent = tk(hr);
     document.getElementById("bd-medical").textContent = tk(med);
     document.getElementById("bd-edu").textContent = tk(edu);
+    document.getElementById("bd-festival").textContent = tk(festival);
+    document.getElementById("bd-exgratia").textContent = tk(exgratia);
     document.getElementById("bd-tiffin").textContent = tk(tiffin);
     document.getElementById("bd-washing").textContent = tk(wash);
-    document.getElementById("bd-edu").textContent = tk(edu);
     document.getElementById("totalSalary").textContent = tk(gross);
     document.getElementById("incText").textContent = "মূল বেতন বৃদ্ধি (" + phase.l(grade) + "): + ৳ " + bn(diff);
     document.getElementById("phaseBadge").textContent = phase.b;
@@ -728,6 +745,8 @@
   document.getElementById("basicCustom").addEventListener("input", calc);
   document.getElementById("location").addEventListener("change", calc);
   document.getElementById("eduAllowance").addEventListener("input", calc);
+  document.getElementById("festivalBonus").addEventListener("input", calc);
+  document.getElementById("exGratia").addEventListener("input", calc);
   document.getElementById("gpfPct").addEventListener("change", calc);
   ["houseLoan","mclLoan","computerLoan","personalLoan","benevolent","revenue"].forEach(function(id){
     document.getElementById(id).addEventListener("input", calc);
