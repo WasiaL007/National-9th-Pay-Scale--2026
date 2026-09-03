@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Wasi Al – ৯ম পে স্কেল ক্যালকুলেটর ২০২৬</title>
+<meta name="description" content="Wasi Al এর ৯ম জাতীয় পে স্কেল ২০২৬ বেতন নির্ধারণ ক্যালকুলেটর — GPF ও ঋণ কর্তনসহ Gross ও Net বেতন" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Bengali', sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 12px; }
+
+  /* ===== Splash Screen ===== */
+  #splash {
+    position: fixed; inset: 0; z-index: 999;
+    background: radial-gradient(circle at 50% 0%, #0b3a38, #071410 70%);
+    color: #e6fffa;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 32px 20px;
+    transition: opacity .35s ease, visibility .35s ease;
+  }
+  #splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+  .splash-logo {
+    width: 180px; height: 165px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+  }
+  .splash-logo img {
+    width: 180px; height: auto;
+    max-height: 165px;
+    object-fit: contain;
+    display: block;
+  }
+  .splash-live {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(45,212,191,0.15); border: 1px solid rgba(16,185,129,0.4);
+    color: #5eead4; font-size: 11px; font-weight: 600;
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+  }
+  .splash-live .dot { width: 7px; height: 7px; border-radius: 50%; background: #2dd4bf; animation: pulse 1.4s infinite; }
+  .splash-datetime { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
+  .dt-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(250,204,21,0.3);
+    color: #fef9c3; font-size: 12px; font-weight: 600;
+    padding: 7px 14px; border-radius: 999px;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  #splash h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+  #splash p.tag { font-size: 13px; color: #fde68a; margin-bottom: 20px; max-width: 320px; }
+  .splash-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 18px; max-width: 360px; margin-bottom: 22px;
+  }
+  .splash-card p { font-size: 12px; color: #cbd5e1; }
+  .splash-btn {
+    background: linear-gradient(90deg,#2dd4bf,#eab308); color: #071410;
+    font-weight: 700; font-size: 14px; padding: 13px 28px; border-radius: 999px;
+    border: none; cursor: pointer; box-shadow: 0 6px 20px rgba(45,212,191,0.35);
+  }
+  .splash-skip { margin-top: 12px; font-size: 11px; color: #64748b; background: none; border: none; text-decoration: underline; cursor: pointer; }
+  .splash-source { margin-top: 24px; font-size: 10px; color: #475569; }
+  .splash-source a { color: #5eead4; text-decoration: none; }
+
+  header {
+    background: linear-gradient(135deg, #064e4a, #0f766e); border-bottom: 1px solid #064e4a;
+    padding: 12px 16px; position: sticky; top: 0; z-index: 40;
+  }
+  .header-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .logo {
+    overflow: hidden;
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(135deg, #2dd4bf, #eab308); color: #fff;
+    font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(45,212,191,0.3);
+  }
+
+  .logo img { width: 60%; height: 60%; border-radius: 50%; object-fit: cover; display: block; }
+  .brand h1 { font-size: 17px; font-weight: 700; color: #1e293b; }
+  .brand p { font-size: 11px; color: #ca8a04; font-weight: 500; }
+  .live-pill {
+    margin-left: auto; display: flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700; color: #ca8a04; background: #e6fffa;
+    border: 1px solid #fde68a; padding: 4px 10px; border-radius: 999px;
+  }
+  .live-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #facc15; animation: pulse 1.4s infinite; }
+
+  .hero { text-align: center; padding: 22px 16px 8px; max-width: 900px; margin: 0 auto; }
+  .hero-badges { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .hb { font-size: 11px; font-weight: 600; padding: 5px 14px; border-radius: 999px; }
+  .hb-mint { background: #fefce8; color: #0d9488; border: 1px solid #99f6e4; }
+  .hb-lemon { background: #fef9c3; color: #a16207; border: 1px solid #fde68a; }
+  .hero h2 { font-size: 21px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+  .hero-sub { font-size: 13px; color: #64748b; max-width: 520px; margin: 0 auto 16px; }
+  .hero-pills { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; }
+  .dt-pill-light { background: #fff; border: 1px solid #e2e8f0; color: #334155; }
+  .dt-pill-live { display: flex; align-items: center; gap: 6px; background: #fefce8; border: 1px solid #99f6e4; color: #0d9488; font-size: 12px; font-weight: 700; padding: 7px 14px; border-radius: 999px; }
+  .dt-pill-live .dot { width: 7px; height: 7px; border-radius: 50%; background: #2dd4bf; animation: pulse 1.4s infinite; }
+
+  .grid { display: grid; gap: 16px; margin-top: 16px; }
+  @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1.4fr; } }
+
+  .card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 16px; }
+  .card-header { background: linear-gradient(90deg, #ca8a04, #eab308); color: #fff; padding: 14px 18px; font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .hdr-icon { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: rgba(255,255,255,0.2); border-radius: 8px; flex-shrink: 0; }
+  .card-header.dark { background: linear-gradient(90deg, #1e293b, #0f172a); }
+  .card-header.indigo { background: linear-gradient(90deg, #a16207, #eab308); }
+  .card-body { padding: 18px; }
+
+  label { display: block; font-size: 13px; font-weight: 500; color: #334155; margin-bottom: 6px; }
+  .form-group { margin-bottom: 16px; }
+  select, input[type="number"] {
+    width: 100%; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 12px;
+    background: #f8fafc; font-size: 14px; color: #0f172a; outline: none;
+    appearance: none; -webkit-appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+  }
+  select:focus, input:focus { border-color: #2dd4bf; box-shadow: 0 0 0 3px rgba(45,212,191,0.15); background: #fff; }
+  .hint { font-size: 11px; color: #64748b; margin-top: 5px; }
+
+  .phase-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .phase-item { display: flex; gap: 10px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 14px; cursor: pointer; transition: all 0.15s; background: #fff; flex-direction: column; }
+  .phase-item:has(input:checked) { border-color: #0d9488; background: linear-gradient(135deg,#0d9488,#0f766e); }
+  .phase-item:has(input:checked) .title span:first-child,
+  .phase-item:has(input:checked) .period,
+  .phase-item:has(input:checked) .desc { color: #ecfeff; }
+  .phase-item:has(input:checked) .badge { background: #fde047; color: #713f12; }
+  .phase-item:has(input:disabled) { opacity: 0.55; cursor: not-allowed; background: #f8fafc; }
+  .phase-item input { display: none; }
+  .phase-item .info { flex: 1; }
+  .phase-item .title { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: #1e293b; }
+  .badge { font-size: 10px; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #a16207; font-weight: 500; }
+  .phase-item:has(input:disabled) .badge { background: #e2e8f0; color: #64748b; }
+  .phase-item .period { font-size: 10px; color: #64748b; margin-top: 3px; }
+  .phase-item .desc { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+
+  .empty { text-align: center; padding: 48px 20px; color: #94a3b8; }
+  .empty-icon { width: 56px; height: 56px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 24px; }
+  .result { display: none; }
+  .result.show { display: block; }
+
+  .summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .sum-card { padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; }
+  .sum-card.old { background: #f8fafc; }
+  .sum-card.new { background: #e6fffa; border-color: #fde68a; }
+  .sum-card .lbl { font-size: 11px; color: #64748b; margin-bottom: 4px; }
+  .sum-card.new .lbl { color: #ca8a04; }
+  .sum-card .val { font-size: 18px; font-weight: 700; color: #1e293b; }
+  .sum-card.new .val { color: #a16207; }
+
+  .breakdown { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+  .breakdown .row { display: flex; justify-content: space-between; padding: 11px 14px; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+  .breakdown .row:last-child { border-bottom: none; }
+  .breakdown .row span:first-child { color: #475569; }
+  .breakdown .row span:last-child { font-weight: 600; color: #1e293b; }
+  .breakdown .row.deduct span:last-child { color: #dc2626; }
+
+  .total-box { background: linear-gradient(90deg, #ca8a04, #eab308); color: #fff; border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+  .total-box .lbl { font-size: 12px; opacity: 0.85; margin-bottom: 4px; }
+  .total-box .val { font-size: 26px; font-weight: 700; }
+  .total-box .inc { margin-top: 6px; font-size: 13px; opacity: 0.9; }
+  .total-box.net { background: linear-gradient(90deg, #a16207, #eab308); }
+  .total-box.net .sub { margin-top: 6px; font-size: 11px; opacity: 0.85; }
+
+  .note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 12px 14px; font-size: 12px; color: #92400e; margin-bottom: 14px; }
+  .note strong { display: block; margin-bottom: 4px; }
+
+  .copy-btn { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; font-size: 13px; font-weight: 500; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .copy-btn:active { background: #f1f5f9; }
+
+  .footer { text-align: center; padding: 20px 12px; font-size: 11px; color: #94a3b8; }
+  .footer .by { color: #ca8a04; font-weight: 600; }
+  .footer a { color: #ca8a04; text-decoration: none; }
+  .made { text-align: center; font-size: 12px; color: #94a3b8; padding: 8px; }
+  .made span { color: #ca8a04; font-weight: 600; }
+
+  .custom-basic { display: none; margin-top: 8px; }
+  .custom-basic.show { display: block; }
+
+  .deduct-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .deduct-grid { grid-template-columns: 1fr; } }
+
+  .grade-list { display: flex; flex-direction: column; gap: 8px; }
+  .grade-row { border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; background: #fff; }
+  .grade-row:nth-child(odd) { background: #f8fafc; }
+  .grade-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+  .grade-num { font-weight: 700; font-size: 14px; color: #0f172a; }
+  .grade-type { font-size: 11px; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 999px; }
+  .grade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .g-item { display: flex; flex-direction: column; gap: 2px; }
+  .g-lbl { font-size: 10px; color: #94a3b8; }
+  .g-val { font-size: 13px; font-weight: 600; color: #1e293b; }
+  .g-val.pct { color: #0f172a; }
+  .g-val.up { color: #ca8a04; }
+  .g-val.new { color: #a16207; }
+</style>
+</head>
+<body>
+
+  <!-- ===== Splash / Startup Screen ===== -->
+  <div id="splash">
+    <div class="splash-live"><span class="dot"></span> লাইভ অনলাইন</div>
+    <div class="splash-datetime">
+      <div class="dt-pill">📅 <span id="splashDate">--</span></div>
+      <div class="dt-pill">🕐 <span id="splashTime">--</span></div>
+    </div>
+    <div class="splash-logo">
+      <img class="splash-logo-img" src="logo-pay-scale.png" alt="Wasi AL logo">
+    </div>
+    <h1>জাতীয় বেতন স্কেল ২০২৬<br>ক্যালকুলেটর</h1>
+    <p class="tag">৯ম পে স্কেল অনুযায়ী Gross ও Net বেতন — GPF ও সকল ঋণ কর্তনসহ নিখুঁত হিসাব</p>
+    <div class="splash-card">
+      <p>বেসিক, বাড়ি ভাড়া, চিকিৎসা ভাতা, GPF কর্তন এবং হাউজ বিল্ডিং/মোটরযান/কম্পিউটার/ব্যক্তিগত ঋণ ও কল্যাণ তহবিল হিসাব করে আপনার প্রকৃত Net বেতন দেখুন।</p>
+    </div>
+    <button class="splash-btn" id="splashStart" type="button">স্মার্ট হিসাব শুরু করুন</button>
+    <button class="splash-skip" id="splashSkip" type="button">সরাসরি ক্যালকুলেটর চালু করুন (এড়িয়ে যান)</button>
+    <div class="splash-source">অনুপ্রেরণা: <a href="https://wasial.pages.dev" target="_blank" rel="noopener">wasial.pages.dev</a></div>
+  </div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo"><img src="logo-pay-scale.png" alt="Wasi AL logo"></div>
+      <div class="brand">
+        <h1 style="color:#fff">Wasi AL</h1>
+        <p style="color:#fff">৯ম পে স্কেল ক্যালকুলেটর ২০২৬</p>
+      </div>
+      <div class="live-pill"><span class="dot"></span> লাইভ</div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-badges">
+      <span class="hb hb-mint">জাতীয় বেতন স্কেল ২০২৬</span>
+      <span class="hb hb-lemon">গণপ্রজাতন্ত্রী বাংলাদেশ</span>
+    </div>
+    <h2>নতুন বেতন স্কেল ২০২৬ ক্যালকুলেটর</h2>
+    <p class="hero-sub">জাতীয় বেতন স্কেল ২০২৬ অনুযায়ী সরকারি চাকরিজীবীদের বেতন হিসাবের সবচেয়ে সহজ ও স্মার্ট ক্যালকুলেটর</p>
+    <div class="hero-pills">
+      <div class="dt-pill dt-pill-light">📅 <span id="mainDate">--</span></div>
+      <div class="dt-pill dt-pill-light">🕐 <span id="mainTime">--</span></div>
+      <div class="dt-pill dt-pill-live"><span class="dot"></span> লাইভ অনলাইন</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Left: Inputs -->
+      <div>
+        <div class="card">
+          <div class="card-header"><span class="hdr-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="2" width="18" height="20" rx="2.5" fill="#fef9c3" stroke="#a16207" stroke-width="1.3"/><line x1="7" y1="7" x2="17" y2="7" stroke="#a16207" stroke-width="1.3" stroke-linecap="round"/><line x1="7" y1="11" x2="17" y2="11" stroke="#a16207" stroke-width="1.3" stroke-linecap="round"/><line x1="7" y1="15" x2="13" y2="15" stroke="#a16207" stroke-width="1.3" stroke-linecap="round"/><circle cx="17" cy="17" r="4" fill="#2dd4bf" stroke="#fff" stroke-width="1"/><path d="M15.5 17l1 1 2-2" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></span> তথ্য প্রদান করুন</div>
+          <div class="card-body">
+            <p class="hero-sub" style="margin-bottom:16px;font-size:12px">আপনার বর্তমান গ্রেড ও বেতন অনুযায়ী ৪-ধাপের বাস্তবায়ন হিসাব করতে সঠিক অপশনগুলো বাছাই করুন</p>
+            <div class="form-group">
+              <label for="grade">গ্রেড নির্বাচন (গ্রেড ০১–২০)</label>
+              <select id="grade">
+                <option value="1">১ম গ্রেড (৭৮,০০০)</option>
+                <option value="2">২য় গ্রেড (৬৬,০০০ - ৭৬,৪৯০)</option>
+                <option value="3">৩য় গ্রেড (৫৬,৫০০ - ৭৪,৪০০)</option>
+                <option value="4">৪র্থ গ্রেড (৫০,০০০ - ৭১,২০০)</option>
+                <option value="5">৫ম গ্রেড (৪৩,০০০ - ৬৯,৮৫০)</option>
+                <option value="6">৬ষ্ঠ গ্রেড (৩৫,৫০০ - ৬৭,০১০)</option>
+                <option value="7">৭ম গ্রেড (২৯,০০০ - ৬৩,৪১০)</option>
+                <option value="8">৮ম গ্রেড (২৩,০০০ - ৫৫,৪৬০)</option>
+                <option value="9" selected>৯ম গ্রেড (২২,০০০ - ৫৩,০৬০)</option>
+                <option value="10">১০ম গ্রেড (১৬,০০০ - ৩৮,৬৪০)</option>
+                <option value="11">১১তম গ্রেড (১২,৫০০ - ৩০,২৪০)</option>
+                <option value="12">১২তম গ্রেড (১১,৩০০ - ২৭,৩০০)</option>
+                <option value="13">১৩তম গ্রেড (১১,০০০ - ২৬,৫৯০)</option>
+                <option value="14">১৪তম গ্রেড (১০,২০০ - ২৪,৬৮০)</option>
+                <option value="15">১৫তম গ্রেড (৯,৭০০ - ২৩,৪৯০)</option>
+                <option value="16">১৬তম গ্রেড (৯,৩০০ - ২২,৪৯০)</option>
+                <option value="17">১৭তম গ্রেড (৯,০০০ - ২১,৮০০)</option>
+                <option value="18">১৮তম গ্রেড (৮,৮০০ - ২১,৩১০)</option>
+                <option value="19">১৯তম গ্রেড (৮,৫০০ - ২০,৫৭০)</option>
+                <option value="20">২০তম গ্রেড (৮,২৫০ - ২০,০১০)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="basicSelect">বর্তমান বেসিক বেতন (২০১৫ স্কেল অনুযায়ী)</label>
+              <select id="basicSelect"></select>
+              <div class="custom-basic" id="customBasicWrap">
+                <input type="number" id="basicCustom" placeholder="কাস্টম বেতন লিখুন" min="1000" step="10" inputmode="numeric">
+              </div>
+              <p class="hint" id="gradeHint">৯ম গ্রেডের প্রারম্ভিক: ৳২২,০০০ (২০১৫) → ৳৪৪,০০০ (২০২৬)</p>
+            </div>
+
+            <div class="form-group">
+              <label>বাস্তবায়ন পর্যায় নির্বাচন (৪টি ধাপ)</label>
+              <div class="phase-list">
+                <label class="phase-item">
+                  <input type="radio" name="phase" value="july_2026" checked>
+                  <div class="info">
+                    <div class="title"><span>১ম পর্যায়</span><span class="badge">৪০%/৫০%</span></div>
+                    <div class="period">জুলাই ২০২৬</div>
+                  </div>
+                </label>
+                <label class="phase-item">
+                  <input type="radio" name="phase" value="jan_2027">
+                  <div class="info">
+                    <div class="title"><span>২য় পর্যায়</span><span class="badge">৭০%/৭৫%</span></div>
+                    <div class="period">জানুয়ারি ২০২৭</div>
+                  </div>
+                </label>
+                <label class="phase-item">
+                  <input type="radio" name="phase" value="july_2027" disabled>
+                  <div class="info">
+                    <div class="title"><span>৩য় পর্যায়</span><span class="badge">শীঘ্রই</span></div>
+                    <div class="period">জুলাই ২০২৭</div>
+                  </div>
+                </label>
+                <label class="phase-item">
+                  <input type="radio" name="phase" value="july_2028" disabled>
+                  <div class="info">
+                    <div class="title"><span>৪র্থ পর্যায়</span><span class="badge">শীঘ্রই</span></div>
+                    <div class="period">জানুয়ারি ২০২৮</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="eduAllowance">শিক্ষা ভাতা (Education Allowance)</label>
+              <input type="number" id="eduAllowance" placeholder="৳ ০" min="0" step="1" inputmode="numeric" value="0">
+              <p class="hint">সন্তান/শিক্ষা বাবদ মাসিক ভাতা — গ্রস বেতনে যোগ হবে।</p>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0">
+              <label for="location">কর্মস্থলের এলাকা (Work Location)</label>
+              <select id="location">
+                <option value="dhaka">ঢাকা সিটি কর্পোরেশন এলাকা</option>
+                <option value="other_city">চট্টগ্রাম, খুলনা, রাজশাহী, সিলেট, বরিশাল, রংপুর, নারায়ণগঞ্জ ও গাজীপুর সিটি কর্পোরেশন এবং সাভার পৌর এলাকা</option>
+                <option value="district_upazila">অন্যান্য স্থানের জন্য (জেলা/উপজেলা)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== GPF & Loan Deductions ===== -->
+        <div class="card">
+          <div class="card-header indigo"><span>🏦</span> GPF ও ঋণ কর্তন</div>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="gpfPct">জিপিএফ কর্তনের হার (GPF Percentage)</label>
+              <select id="gpfPct">
+                <option value="0">কর্তন নেই (০%)</option>
+                <option value="10">১০%</option>
+                <option value="15">১৫%</option>
+                <option value="20">২০%</option>
+                <option value="25" selected>২৫% (বেসিকের ২৫% কর্তন)</option>
+              </select>
+              <p class="hint">জিপিএফ কর্তন বেসিক বেতনের উপর হিসাব হয়।</p>
+            </div>
+
+            <div class="deduct-grid">
+              <div class="form-group">
+                <label for="houseLoan">হাউজ বিল্ডিং লোন কিস্তি</label>
+                <input type="number" id="houseLoan" placeholder="৳ ০" min="0" step="1" inputmode="numeric" value="0">
+              </div>
+              <div class="form-group">
+                <label for="mclLoan">মোটরযান লোন কিস্তি (MCL)</label>
+                <input type="number" id="mclLoan" placeholder="৳ ০" min="0" step="1" inputmode="numeric" value="0">
+              </div>
+              <div class="form-group">
+                <label for="computerLoan">কম্পিউটার লোন কিস্তি</label>
+                <input type="number" id="computerLoan" placeholder="৳ ০" min="0" step="1" inputmode="numeric" value="0">
+              </div>
+              <div class="form-group">
+                <label for="personalLoan">পার্সোনাল লোন কিস্তি</label>
+                <input type="number" id="personalLoan" placeholder="৳ ০" min="0" step="1" inputmode="numeric" value="0">
+              </div>
+              <div class="form-group">
+                <label for="benevolent">কল্যাণ তহবিল (Benevolent Fund)</label>
+                <input type="number" id="benevolent" placeholder="৳ ০" min="0" step="1" inputmode="numeric" value="0">
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label for="revenue">রাজস্ব / রেভিনিউ স্ট্যাম্প</label>
+                <input type="number" id="revenue" placeholder="৳ ২০" min="0" step="1" inputmode="numeric" value="20">
+              </div>
+            </div>
+          </div>
+        </div>
+       
+      <!-- Right: Result -->
+      <div>
+        <div class="card">
+          <div class="card-header dark">
+            বিস্তারিত স্যালারি ব্রেকডাউন
+            <span id="phaseBadge" style="margin-left:auto;font-size:11px;background:rgba(16,185,129,0.2);color:#5eead4;padding:3px 10px;border-radius:999px;"></span>
+          </div>
+          <div class="card-body">
+            <div class="empty" id="emptyState">
+              <div class="empty-icon">৳</div>
+              <p>বামে আপনার বর্তমান গ্রেড এবং মূল বেতন ইনপুট দিলে স্বয়ংক্রিয়ভাবে ২০২৬ এর প্রস্তাবিত বেতন এখানে প্রদর্শিত হবে।</p>
+            </div>
+
+            <div class="result" id="resultContent">
+              <div class="summary">
+                <div class="sum-card old">
+                  <div class="lbl">বর্তমান মূল বেতন</div>
+                  <div class="val" id="prevBasic">৳ ০</div>
+                </div>
+                <div class="sum-card new">
+                  <div class="lbl">নতুন মূল বেতন</div>
+                  <div class="val" id="newBasic">৳ ০</div>
+                </div>
+              </div>
+
+              <div class="breakdown">
+                <div class="row"><span>নতুন মূল বেতন</span><span id="bd-basic">৳ ০</span></div>
+                <div class="row"><span>বাড়ি ভাড়া ভাতা</span><span id="bd-house">৳ ০</span></div>
+                <div class="row"><span>চিকিৎসা ভাতা</span><span id="bd-medical">৳ ০</span></div>
+                <div class="row"><span>শিক্ষা ভাতা</span><span id="bd-edu">৳ ০</span></div>
+                <div class="row"><span>টিফিন ভাতা</span><span id="bd-tiffin">৳ ০</span></div>
+                <div class="row"><span>ধোয়া-মোছা ভাতা</span><span id="bd-washing">৳ ০</span></div>
+              </div>
+
+              <div class="total-box">
+                <div class="lbl">গ্রস বেতন (Gross Salary)</div>
+                <div class="val" id="totalSalary">৳ ০</div>
+                <div class="inc" id="incText">মূল বেতন বৃদ্ধি: + ৳ ০</div>
+              </div>
+
+              <div class="breakdown">
+                <div class="row deduct"><span>জিপিএফ কর্তন</span><span id="bd-gpf">৳ ০</span></div>
+                <div class="row deduct"><span>হাউজ বিল্ডিং লোন</span><span id="bd-houseLoan">৳ ০</span></div>
+                <div class="row deduct"><span>মোটরযান লোন (MCL)</span><span id="bd-mclLoan">৳ ০</span></div>
+                <div class="row deduct"><span>কম্পিউটার লোন</span><span id="bd-computerLoan">৳ ০</span></div>
+                <div class="row deduct"><span>পার্সোনাল লোন</span><span id="bd-personalLoan">৳ ০</span></div>
+                <div class="row deduct"><span>কল্যাণ তহবিল</span><span id="bd-benevolent">৳ ০</span></div>
+                <div class="row deduct"><span>রাজস্ব/স্ট্যাম্প</span><span id="bd-revenue">৳ ০</span></div>
+                <div class="row"><span><strong>মোট কর্তন</strong></span><span id="bd-totalDeduct">৳ ০</span></div>
+              </div>
+
+              <div class="total-box net">
+                <div class="lbl">নেট বেতন (Net Take-Home Pay)</div>
+                <div class="val" id="netSalary">৳ ০</div>
+                <div class="sub" id="netSub">গ্রস থেকে মোট কর্তনের পর অবশিষ্টাংশ</div>
+              </div>
+
+              <div class="note">
+                <strong>📌 গুরুত্বপূর্ণ নোট</strong>
+                <span id="infoNote">এই ক্যালকুলেশন প্রস্তাবিত ৯ম পে স্কেল ২০২৬ অনুযায়ী। চূড়ান্ত গেজেট প্রকাশের পর কিছু পরিবর্তন হতে পারে।</span>
+              </div>
+
+              <button class="copy-btn" id="pdfBtn" type="button">📄 PDF ডাউনলোড করুন</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reference Table -->
+    <div class="mt-8 mb-4" style="margin-top:24px;margin-bottom:16px">
+      <div class="card">
+        <div class="card-header" style="background:linear-gradient(90deg,#0f172a,#1e293b)">
+          প্রস্তাবিত বেতন স্কেল ও ৪-ধাপে বাস্তবায়ন কাঠামো (২০২৬)
+        </div>
+        <div class="card-body">
+          <p style="font-size:12px;color:#64748b;margin-bottom:14px">জাতীয় বেতন কমিশন ২০২৬ এর সুপারিশকৃত ধাপভিত্তিক রূপরেখা ও গ্রেড তালিকা · <span style="background:#e6fffa;color:#a16207;padding:2px 8px;border-radius:8px;font-weight:600;font-size:11px">খসড়া রেফারেন্স</span></p>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px">
+            <div style="padding:12px;border-radius:12px;background:#e6fffa;border:1px solid #fde68a">
+              <div style="font-size:10px;font-weight:700;color:#a16207">১ম পর্যায়</div>
+              <div style="font-weight:700;font-size:13px;margin-top:4px">০১ জুলাই ২০২৬</div>
+              <div style="font-size:11px;margin-top:6px;color:#134e4a">১-৯ম: ৪০% · ১০-২০তম: ৫০%</div>
+            </div>
+            <div style="padding:12px;border-radius:12px;background:#fefce8;border:1px solid #fde68a">
+              <div style="font-size:10px;font-weight:700;color:#a16207">২য় পর্যায়</div>
+              <div style="font-weight:700;font-size:13px;margin-top:4px">০১ জানুয়ারি ২০২৭</div>
+              <div style="font-size:11px;margin-top:6px;color:#854d0e">১-৯ম: ৭০% · ১০-২০তম: ৭৫%</div>
+            </div>
+            <div style="padding:12px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;opacity:0.85">
+              <div style="font-size:10px;font-weight:700;color:#64748b">৩য় পর্যায় (আসন্ন)</div>
+              <div style="font-weight:700;font-size:13px;margin-top:4px">০১ জুলাই ২০২৭</div>
+              <div style="font-size:11px;margin-top:6px;color:#475569">১০০% বাস্তবায়ন</div>
+            </div>
+            <div style="padding:12px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;opacity:0.85">
+              <div style="font-size:10px;font-weight:700;color:#64748b">৪র্থ পর্যায় (আসন্ন)</div>
+              <div style="font-weight:700;font-size:13px;margin-top:4px">০১ জানুয়ারি ২০২৮</div>
+              <div style="font-size:11px;margin-top:6px;color:#475569">পূর্ণাঙ্গ স্কেল + ভাতা</div>
+            </div>
+          </div>
+
+          <div class="grade-list" id="gradeList"><!-- generated by JS --></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>© ২০২৬ <span class="by">Wasi Al Enterprise</span> — ৯ম পে স্কেল ক্যালকুলেটর</p>
+    <p style="margin-top:4px">শুধুমাত্র তথ্যমূলক উদ্দেশ্যে। অফিসিয়াল গেজেট অনুসরণ করুন।</p>
+  </div>
+
+<script>
+  // 2015 Pay Scale Steps (unchanged)
+  var STEPS_2015 = {
+    1:  [78000],
+    2:  [66000,68480,71050,73720,76490],
+    3:  [56500,58760,61120,63570,66120,68770,71530,74400],
+    4:  [50000,52000,54080,56250,58500,60840,63280,65820,68460,71200],
+    5:  [43000,44940,46670,48390,51300,53610,56030,58560,61200,63960,66840,69850],
+    6:  [35500,37280,39150,41110,43170,45330,47400,49980,52480,55110,57870,60770,63810,67010],
+    7:  [29000,30450,31980,33580,35280,37030,38890,40840,42890,45040,47300,49670,52160,54770,57510,60390,63410],
+    8:  [23000,24150,25360,26630,27970,29370,30840,32390,34010,35720,37510,39390,41360,43430,45610,47900,50290,52810,55460],
+    9:  [22000,23100,24260,25480,26760,28100,29510,30990,32540,34170,35880,37680,39570,41550,43630,45820,48120,50530,53060],
+    10: [16000,16800,17680,18530,19460,20440,21470,22550,23680,24870,26120,27430,28810,30260,31780,33370,35040,36800,38640],
+    11: [12500,13130,13790,14440,15210,15980,16780,17620,18520,19450,20430,21460,22540,23670,24860,26110,27420,28800,30240],
+    12: [11300,11870,12470,13100,13760,14450,15180,15940,16740,17580,18460,19390,20360,21380,22450,23580,24760,26000,27300],
+    13: [11000,11550,12130,12740,13380,14050,14760,15500,16280,17100,17960,18860,19810,20810,21860,22960,24110,25320,26590],
+    14: [10200,10710,11250,11820,12420,13050,13710,14400,15120,15880,16680,17520,18400,19320,20290,21310,22380,23500,24680],
+    15: [9700,10190,10700,11240,11810,12410,13040,13700,14390,15110,15870,16670,17510,18390,19310,20280,21300,22370,23490],
+    16: [9300,9770,10260,10780,11320,11890,12490,13120,13780,14470,15200,15960,16760,17600,18480,19410,20390,21410,22490],
+    17: [9000,9450,9930,10430,10960,11510,12090,12700,13340,14010,14720,15460,16240,17060,17920,18820,19770,20760,21800],
+    18: [8800,9240,9710,10200,10710,11250,11820,12420,13050,13710,14400,15120,15880,16680,17520,18400,19320,20290,21310],
+    19: [8500,8930,9380,9850,10350,10870,11420,12000,12600,13230,13900,14600,15330,16100,16910,17760,18650,19590,20570],
+    20: [8250,8670,9110,9570,10050,10560,11090,11550,12240,12860,13510,14190,14900,15650,16440,17270,18180,19050,20010]
+  };
+
+  var META = {
+    1:  { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:156000 },
+    2:  { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:132000 },
+    3:  { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:113000 },
+    4:  { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:100000 },
+    5:  { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:86000 },
+    6:  { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:71000 },
+    7:  { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:58000 },
+    8:  { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:46000 },
+    9:  { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:44000 },
+    10: { g:1,    t:"কর্মকর্তা", r:"১০০%", s26:32000 },
+    11: { g:1,    t:"কর্মচারী", r:"১০০%", s26:25000 },
+    12: { g:1.15, t:"কর্মচারী", r:"১১৫%", s26:24300 },
+    13: { g:1.18, t:"কর্মচারী", r:"১১৮%", s26:24000 },
+    14: { g:1.3,  t:"কর্মচারী", r:"১৩০%", s26:23500 },
+    15: { g:1.35, t:"কর্মচারী", r:"১৩৫%", s26:22800 },
+    16: { g:1.35, t:"কর্মচারী", r:"১৩৫%", s26:21900 },
+    17: { g:1.38, t:"কর্মচারী", r:"১৩৮%", s26:21400 },
+    18: { g:1.39, t:"কর্মচারী", r:"১৩৯%", s26:21000 },
+    19: { g:1.41, t:"কর্মচারী", r:"১৪১%", s26:20500 },
+    20: { g:1.42, t:"কর্মচারী", r:"১৪২%", s26:20000 }
+  };
+
+  var PHASES = {
+    july_2026: { f: function(gr){ return gr<=9 ? 0.4 : 0.5; }, l: function(gr){ return gr<=9 ? "৪০%" : "৫০%"; }, b: "১ম ধাপ (৪০%/৫০%)" },
+    jan_2027:  { f: function(gr){ return gr<=9 ? 0.7 : 0.75; }, l: function(gr){ return gr<=9 ? "৭০%" : "৭৫%"; }, b: "২য় ধাপ (৭০%/৭৫%)" },
+    july_2027: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "শীঘ্রই কার্যকর" },
+    july_2028: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "শীঘ্রই কার্যকর" }
+  };
+
+  function bn(n) {
+    if (isNaN(n) || n == null) return "০";
+    return Math.round(n).toLocaleString("bn-BD");
+  }
+  function tk(n) { return "৳ " + bn(n); }
+  function num(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+  function houseRent(basic, loc) {
+    var p = 0;
+    if (loc === "dhaka") {
+      if (basic <= 9700) p = Math.max(basic * 0.65, 5600);
+      else if (basic <= 16000) p = Math.max(basic * 0.6, 6400);
+      else if (basic <= 35500) p = Math.max(basic * 0.55, 9600);
+      else p = Math.max(basic * 0.5, 19500);
+    } else if (loc === "other_city") {
+      if (basic <= 9700) p = Math.max(basic * 0.55, 5000);
+      else if (basic <= 16000) p = Math.max(basic * 0.5, 5400);
+      else if (basic <= 35500) p = Math.max(basic * 0.45, 8000);
+      else p = Math.max(basic * 0.4, 16000);
+    } else {
+      if (basic <= 9700) p = Math.max(basic * 0.5, 4500);
+      else if (basic <= 16000) p = Math.max(basic * 0.45, 4800);
+      else if (basic <= 35500) p = Math.max(basic * 0.4, 7000);
+      else p = Math.max(basic * 0.35, 13800);
+    }
+    return Math.round(p);
+  }
+
+  function fillBasicOptions() {
+    var grade = parseInt(document.getElementById("grade").value, 10);
+    var steps = STEPS_2015[grade] || [];
+    var sel = document.getElementById("basicSelect");
+    sel.innerHTML = "";
+
+    for (var i = 0; i < steps.length; i++) {
+      var opt = document.createElement("option");
+      opt.value = steps[i];
+      opt.textContent = bn(steps[i]) + " টাকা";
+      if (i === 0) opt.selected = true;
+      sel.appendChild(opt);
+    }
+
+    var custom = document.createElement("option");
+    custom.value = "custom";
+    custom.textContent = "কাস্টম বেতন লিখুন...";
+    sel.appendChild(custom);
+
+    document.getElementById("customBasicWrap").classList.remove("show");
+    document.getElementById("basicCustom").value = "";
+
+    var meta = META[grade];
+    if (meta) {
+      document.getElementById("gradeHint").textContent =
+        grade + "ম গ্রেডের প্রারম্ভিক: ৳" + bn(steps[0]) + " (২০১৫) → ৳" + bn(meta.s26) + " (২০২৬)";
+    }
+  }
+
+  function getCurrentBasic() {
+    var sel = document.getElementById("basicSelect");
+    if (sel.value === "custom") {
+      return parseFloat(document.getElementById("basicCustom").value) || 0;
+    }
+    return parseFloat(sel.value) || 0;
+  }
+
+  function calc() {
+    var grade = parseInt(document.getElementById("grade").value, 10);
+    var phaseId = (document.querySelector('input[name="phase"]:checked') || {}).value || "july_2026";
+    var basic = getCurrentBasic();
+    var loc = document.getElementById("location").value;
+
+    var meta = META[grade];
+    var phase = PHASES[phaseId];
+    var steps = STEPS_2015[grade] || [];
+
+    if (!meta || !phase || basic <= 0) {
+      document.getElementById("emptyState").style.display = "block";
+      document.getElementById("resultContent").classList.remove("show");
+      return;
+    }
+
+    var factor = phase.f(grade);
+    var increase = Math.round(steps[0] * meta.g * factor * 10) / 10;
+    var newBasic = Math.round((basic + increase) * 10) / 10;
+    var hr = houseRent(basic, loc);
+    var med = 1500;
+    var tiffin = (grade >= 13 && grade <= 20) ? 200 : 0;
+    var wash = (grade >= 13 && grade <= 20) ? 100 : 0;
+    var edu = num("eduAllowance");
+    var gross = Math.round((newBasic + hr + med + tiffin + wash + edu) * 10) / 10;
+    var diff = newBasic - basic;
+
+    // ===== GPF & Loan deductions =====
+    var gpfPct = num("gpfPct");
+    var gpf = Math.round(basic * (gpfPct / 100));
+    var houseLoan = num("houseLoan");
+    var mclLoan = num("mclLoan");
+    var computerLoan = num("computerLoan");
+    var personalLoan = num("personalLoan");
+    var benevolent = num("benevolent");
+    var revenue = num("revenue");
+    var totalDeduct = gpf + houseLoan + mclLoan + computerLoan + personalLoan + benevolent + revenue;
+    var net = Math.round((gross - totalDeduct) * 10) / 10;
+
+    document.getElementById("emptyState").style.display = "none";
+    document.getElementById("resultContent").classList.add("show");
+
+    document.getElementById("prevBasic").textContent = tk(basic);
+    document.getElementById("newBasic").textContent = tk(newBasic);
+    document.getElementById("bd-basic").textContent = tk(newBasic);
+    document.getElementById("bd-house").textContent = tk(hr);
+    document.getElementById("bd-medical").textContent = tk(med);
+    document.getElementById("bd-edu").textContent = tk(edu);
+    document.getElementById("bd-tiffin").textContent = tk(tiffin);
+    document.getElementById("bd-washing").textContent = tk(wash);
+    document.getElementById("bd-edu").textContent = tk(edu);
+    document.getElementById("totalSalary").textContent = tk(gross);
+    document.getElementById("incText").textContent = "মূল বেতন বৃদ্ধি (" + phase.l(grade) + "): + ৳ " + bn(diff);
+    document.getElementById("phaseBadge").textContent = phase.b;
+    document.getElementById("infoNote").textContent =
+      "গ্রেড " + grade + " • " + meta.t + " • প্রারম্ভিক বৃদ্ধি হার " + meta.r + " এর " + phase.l(grade) + " কার্যকর। চূড়ান্ত গেজেট প্রকাশের পর পরিবর্তন হতে পারে।";
+
+    document.getElementById("bd-gpf").textContent = tk(gpf);
+    document.getElementById("bd-houseLoan").textContent = tk(houseLoan);
+    document.getElementById("bd-mclLoan").textContent = tk(mclLoan);
+    document.getElementById("bd-computerLoan").textContent = tk(computerLoan);
+    document.getElementById("bd-personalLoan").textContent = tk(personalLoan);
+    document.getElementById("bd-benevolent").textContent = tk(benevolent);
+    document.getElementById("bd-revenue").textContent = tk(revenue);
+    document.getElementById("bd-totalDeduct").textContent = tk(totalDeduct);
+    document.getElementById("netSalary").textContent = tk(net);
+    document.getElementById("netSub").textContent =
+      "গ্রস ৳" + bn(gross) + " থেকে মোট কর্তন ৳" + bn(totalDeduct) + " বাদে অবশিষ্টাংশ";
+  }
+
+  function buildGradeList() {
+    var wrap = document.getElementById("gradeList");
+    var html = "";
+    for (var g = 1; g <= 20; g++) {
+      var meta = META[g];
+      var steps = STEPS_2015[g];
+      if (!meta || !steps) continue;
+      var start2015 = steps[0];
+      var inc = Math.round(start2015 * meta.g);
+      html += '<div class="grade-row">'
+        + '<div class="grade-top"><span class="grade-num">' + g + 'ম গ্রেড</span><span class="grade-type">' + meta.t + '</span></div>'
+        + '<div class="grade-grid">'
+        + '<div class="g-item"><span class="g-lbl">২০১৫ প্রারম্ভিক</span><span class="g-val">৳ ' + bn(start2015) + '</span></div>'
+        + '<div class="g-item"><span class="g-lbl">পূর্ণ বৃদ্ধি</span><span class="g-val pct">' + meta.r + '</span></div>'
+        + '<div class="g-item"><span class="g-lbl">জুলাই-২৬ বৃদ্ধি</span><span class="g-val up">+৳ ' + bn(inc) + '</span></div>'
+        + '<div class="g-item"><span class="g-lbl">২০২৬ প্রারম্ভিক</span><span class="g-val new">৳ ' + bn(meta.s26) + '</span></div>'
+        + '</div></div>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  // Events
+  document.getElementById("grade").addEventListener("change", function() { fillBasicOptions(); calc(); });
+  document.getElementById("basicSelect").addEventListener("change", function() {
+    if (this.value === "custom") {
+      document.getElementById("customBasicWrap").classList.add("show");
+      document.getElementById("basicCustom").focus();
+    } else {
+      document.getElementById("customBasicWrap").classList.remove("show");
+    }
+    calc();
+  });
+  document.getElementById("basicCustom").addEventListener("input", calc);
+  document.getElementById("location").addEventListener("change", calc);
+  document.getElementById("eduAllowance").addEventListener("input", calc);
+  document.getElementById("gpfPct").addEventListener("change", calc);
+  ["houseLoan","mclLoan","computerLoan","personalLoan","benevolent","revenue"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", calc);
+  });
+
+  var radios = document.querySelectorAll('input[name="phase"]');
+  for (var i = 0; i < radios.length; i++) { radios[i].addEventListener("change", calc); }
+
+  document.getElementById("pdfBtn").addEventListener("click", function() {
+    var grade = document.getElementById("grade").value;
+    var gradeText = document.getElementById("grade").selectedOptions[0].textContent;
+    var phase = document.getElementById("phaseBadge").textContent;
+    var rows = [
+      ["নতুন মূল বেতন", document.getElementById("bd-basic").textContent],
+      ["বাড়ি ভাড়া ভাতা", document.getElementById("bd-house").textContent],
+      ["চিকিৎসা ভাতা", document.getElementById("bd-medical").textContent],
+      ["শিক্ষা ভাতা", document.getElementById("bd-edu").textContent],
+      ["টিফিন ভাতা", document.getElementById("bd-tiffin").textContent],
+      ["ধোয়া-মোছা ভাতা", document.getElementById("bd-washing").textContent]
+    ];
+    var deductRows = [
+      ["জিপিএফ কর্তন", document.getElementById("bd-gpf").textContent],
+      ["হাউজ বিল্ডিং লোন", document.getElementById("bd-houseLoan").textContent],
+      ["মোটরযান লোন (MCL)", document.getElementById("bd-mclLoan").textContent],
+      ["কম্পিউটার লোন", document.getElementById("bd-computerLoan").textContent],
+      ["পার্সোনাল লোন", document.getElementById("bd-personalLoan").textContent],
+      ["কল্যাণ তহবিল", document.getElementById("bd-benevolent").textContent],
+      ["রাজস্ব/স্ট্যাম্প", document.getElementById("bd-revenue").textContent]
+    ];
+    var rowsHtml = rows.map(function(r){ return '<tr><td>'+r[0]+'</td><td class="amt">'+r[1]+'</td></tr>'; }).join("");
+    var deductHtml = deductRows.map(function(r){ return '<tr><td>'+r[0]+'</td><td class="amt deduct">'+r[1]+'</td></tr>'; }).join("");
+    var win = window.open("", "_blank");
+    win.document.write(
+      '<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8">' +
+      '<title>বেতন হিসাব রিপোর্ট</title>' +
+      '<style>' +
+      'body{font-family:system-ui,"Noto Sans Bengali",sans-serif;padding:28px;color:#0f172a;max-width:640px;margin:0 auto}' +
+      '.hd{text-align:center;border-bottom:3px solid #0d9488;padding-bottom:14px;margin-bottom:20px}' +
+      '.hd h1{font-size:20px;color:#0d9488;margin-bottom:4px}' +
+      '.hd p{font-size:12px;color:#64748b}' +
+      '.meta{display:flex;justify-content:space-between;font-size:12px;background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;margin-bottom:16px}' +
+      'table{width:100%;border-collapse:collapse;margin-bottom:16px}' +
+      'td{padding:9px 6px;font-size:13px;border-bottom:1px solid #f1f5f9}' +
+      '.amt{text-align:right;font-weight:700}' +
+      '.deduct{color:#dc2626}' +
+      '.sec-title{font-size:13px;font-weight:700;color:#0d9488;margin:14px 0 6px}' +
+      '.totalbox{background:linear-gradient(90deg,#0d9488,#0f766e);color:#fff;border-radius:12px;padding:14px 18px;margin-bottom:10px}' +
+      '.totalbox .l{font-size:11px;opacity:.85}.totalbox .v{font-size:22px;font-weight:800}' +
+      '.netbox{background:linear-gradient(90deg,#ca8a04,#a16207)}' +
+      '.ft{text-align:center;font-size:10px;color:#94a3b8;margin-top:20px}' +
+      '@media print{body{padding:10px}}' +
+      '</style></head><body>' +
+      '<div class="hd"><h1>জাতীয় বেতন স্কেল ২০২৬ — বেতন হিসাব রিপোর্ট</h1><p>Wasi Al · ৯ম পে স্কেল ক্যালকুলেটর</p></div>' +
+      '<div class="meta"><span>গ্রেড: <b>' + gradeText + '</b></span><span>ধাপ: <b>' + phase + '</b></span></div>' +
+      '<div class="sec-title">বেতন বিবরণ</div>' +
+      '<table>' + rowsHtml + '</table>' +
+      '<div class="totalbox"><div class="l">গ্রস বেতন (Gross Salary)</div><div class="v">' + document.getElementById("totalSalary").textContent + '</div></div>' +
+      '<div class="sec-title">কর্তন বিবরণ</div>' +
+      '<table>' + deductHtml + '<tr><td><b>মোট কর্তন</b></td><td class="amt deduct"><b>' + document.getElementById("bd-totalDeduct").textContent + '</b></td></tr></table>' +
+      '<div class="totalbox netbox"><div class="l">নেট বেতন (Net Take-Home Pay)</div><div class="v">' + document.getElementById("netSalary").textContent + '</div></div>' +
+      '<div class="ft">শুধুমাত্র তথ্যমূলক উদ্দেশ্যে · অফিসিয়াল গেজেট অনুসরণ করুন · © ২০২৬ Wasi Al</div>' +
+      '</body></html>'
+    );
+    win.document.close();
+    setTimeout(function(){ win.print(); }, 300);
+  });
+
+  // Splash screen controls
+  function dismissSplash() { document.getElementById("splash").classList.add("hide"); }
+  document.getElementById("splashStart").addEventListener("click", dismissSplash);
+  document.getElementById("splashSkip").addEventListener("click", dismissSplash);
+  setTimeout(dismissSplash, 4000);
+
+  // ===== Live Bengali date & time =====
+  var BN_DAYS = ["রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার","শনিবার"];
+  var BN_MONTHS = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
+  function toBnDigits(n) { return String(n).replace(/\d/g, function(d){ return "০১২৩৪৫৬৭৮৯"[d]; }); }
+  function updateClock() {
+    var now = new Date();
+    var dateStr = BN_DAYS[now.getDay()] + ", " + toBnDigits(now.getDate()) + " " + BN_MONTHS[now.getMonth()] + " " + toBnDigits(now.getFullYear());
+    var h = now.getHours();
+    var ampm = h < 12 ? "পূর্বাহ্ণ" : "অপরাহ্ণ";
+    var h12 = h % 12; if (h12 === 0) h12 = 12;
+    var timeStr = ampm + " " + toBnDigits(h12) + ":" + toBnDigits(String(now.getMinutes()).padStart(2,"0")) + ":" + toBnDigits(String(now.getSeconds()).padStart(2,"0"));
+    var dEl = document.getElementById("splashDate");
+    var tEl = document.getElementById("splashTime");
+    var dEl2 = document.getElementById("mainDate");
+    var tEl2 = document.getElementById("mainTime");
+    if (dEl) dEl.textContent = dateStr;
+    if (tEl) tEl.textContent = timeStr;
+    if (dEl2) dEl2.textContent = dateStr;
+    if (tEl2) tEl2.textContent = timeStr;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Init
+  fillBasicOptions();
+  buildGradeList();
+  calc();
+</script>
+</body>
+</html>
