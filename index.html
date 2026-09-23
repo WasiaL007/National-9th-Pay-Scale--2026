@@ -298,7 +298,7 @@
             </div>
 
             <div class="form-group">
-              <label>বাস্তবায়ন পর্যায় নির্বাচন (৪টি ধাপ)</label>
+              <label>বেতন কার্যকর/ভাতা কার্যকর তারিখ নির্বাচন</label>
               <div class="phase-list">
                 <label class="phase-item">
                   <input type="radio" name="phase" value="july_2026" checked>
@@ -324,8 +324,8 @@
                 <label class="phase-item">
                   <input type="radio" name="phase" value="july_2028">
                   <div class="info">
-                    <div class="title"><span>৪র্থ পর্যায়</span><span class="badge">১০০%</span></div>
-                    <div class="period">জানুয়ারি ২০২৮</div>
+                    <div class="title"><span>ভাতা কার্যকর</span><span class="badge">নতুন হার</span></div>
+                    <div class="period">১ জানুয়ারি ২০২৮
                   </div>
                 </label>
               </div>
@@ -596,10 +596,10 @@
   };
 
   var PHASES = {
-    july_2026: { f: function(gr){ return gr<=9 ? 0.4 : 0.5; }, l: function(gr){ return gr<=9 ? "৪০%" : "৫০%"; }, b: "১ম ধাপ (৪০%/৫০%)" },
-    jan_2027:  { f: function(gr){ return gr<=9 ? 0.7 : 0.75; }, l: function(gr){ return gr<=9 ? "৭০%" : "৭৫%"; }, b: "২য় ধাপ (৭০%/৭৫%)" },
-    july_2027: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "৩য় ধাপ (১০০%)" },
-    july_2028: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "৪র্থ ধাপ (১০০% + নতুন বাড়িভাড়া)" }
+    july_2026: { f: function(gr){ return gr<=9 ? 0.4 : 0.5; }, l: function(gr){ return gr<=9 ? "৪০%" : "৫০%"; }, b: "১ জুলাই ২০২৬ — ১ম ধাপ (৪০%/৫০%)" },
+    jan_2027:  { f: function(gr){ return gr<=9 ? 0.7 : 0.75; }, l: function(gr){ return gr<=9 ? "৭০%" : "৭৫%"; }, b: "১ জানুয়ারি ২০২৭ — ২য় ধাপ (৭০%/৭৫%)" },
+    july_2027: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "১ জুলাই ২০২৭ — ৩য় ধাপ (১০০%)" },
+    july_2028: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "১ জানুয়ারি ২০২৮ — নতুন হারে ভাতা কার্যকর" }
   };
 
   function bn(n) {
@@ -644,12 +644,71 @@
   }
 
   function newHouseRent(grade, basic, loc) {
+    /*
+      SRO 347-Law/2026, allowance table effective 01-01-2028:
+      Grade 16-20 : Dhaka 60%, designated city areas 60%, others 45%
+      Grade 10-15 : Dhaka 50%, designated city areas 40%, others 35%
+      Grade 5-9   : Dhaka 45%, designated city areas 35%, others 30%
+      Grade 1-4   : Dhaka 80%, designated city areas 80%, others 25%
+    */
     var pct;
-    if (grade >= 16) pct = loc === "dhaka" ? 0.60 : (loc === "other_city" ? 0.50 : 0.45);
+    if (grade >= 16) pct = loc === "dhaka" ? 0.60 : (loc === "other_city" ? 0.60 : 0.45);
     else if (grade >= 10) pct = loc === "dhaka" ? 0.50 : (loc === "other_city" ? 0.40 : 0.35);
     else if (grade >= 5) pct = loc === "dhaka" ? 0.45 : (loc === "other_city" ? 0.35 : 0.30);
-    else pct = loc === "dhaka" ? 0.40 : (loc === "other_city" ? 0.30 : 0.25);
+    else pct = loc === "dhaka" ? 0.80 : (loc === "other_city" ? 0.80 : 0.25);
     return Math.round(basic * pct);
+  }
+
+  function ensureGazetteUI() {
+    if (document.getElementById("gazetteFixationCard")) return;
+
+    var gpf = document.getElementById("gpfPct");
+    if (!gpf) return;
+    var gpfCard = gpf.closest(".card");
+
+    var card = document.createElement("div");
+    card.className = "card";
+    card.id = "gazetteFixationCard";
+    card.innerHTML =
+      '<div class="card-header" style="background:#0f766e"><span>📜</span> গেজেট Pay Fixation — SRO 347-Law/2026</div>' +
+      '<div style="padding:16px">' +
+        '<div class="field">' +
+          '<label for="gazetteDate">কোন তারিখে বেতন দেখতে চান?</label>' +
+          '<select id="gazetteDate">' +
+            '<option value="july_2026">১ জুলাই ২০২৬</option>' +
+            '<option value="jan_2027">১ জানুয়ারি ২০২৭</option>' +
+            '<option value="july_2027">১ জুলাই ২০২৭</option>' +
+            '<option value="july_2028">১ জানুয়ারি ২০২৮ — নতুন হারে ভাতা</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label>শিক্ষা সহায়ক ভাতার জন্য সন্তানের বয়স (সর্বোচ্চ ২৩ বছর)</label>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+            '<input type="number" id="child1Age" min="0" max="100" placeholder="সন্তান ১ — বয়স">' +
+            '<input type="number" id="child2Age" min="0" max="100" placeholder="সন্তান ২ — বয়স">' +
+          '</div>' +
+          '<small style="display:block;margin-top:6px;opacity:.75">ফাঁকা রাখলে বিদ্যমান সন্তান-সংখ্যা field-এর হিসাব আগের মতো থাকবে।</small>' +
+        '</div>' +
+        '<div id="gazetteFixationSummary" style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(13,148,136,.08);font-size:13px"></div>' +
+      '</div>';
+
+    gpfCard.parentNode.insertBefore(card, gpfCard);
+
+    var dateEl = document.getElementById("gazetteDate");
+    dateEl.addEventListener("change", function() {
+      var r = document.querySelector('input[name="phase"][value="' + this.value + '"]');
+      if (r) r.checked = true;
+      calc();
+    });
+
+    ["child1Age","child2Age"].forEach(function(id) {
+      document.getElementById(id).addEventListener("input", calc);
+    });
+
+    var basicLabel = document.querySelector('label[for="basicSelect"]');
+    if (basicLabel) {
+      basicLabel.textContent = "৩০ জুন ২০২৬ তারিখের বর্তমান মূল বেতন";
+    }
   }
 
   function fillBasicOptions() {
@@ -694,6 +753,9 @@
   function calc() {
     var grade = parseInt(document.getElementById("grade").value, 10);
     var phaseId = (document.querySelector('input[name="phase"]:checked') || {}).value || "july_2026";
+    var dateEl = document.getElementById("gazetteDate");
+    if (dateEl) dateEl.value = phaseId;
+
     var basic = getCurrentBasic();
     var loc = document.getElementById("location").value;
 
@@ -708,29 +770,80 @@
       return;
     }
 
+    /*
+      Gazette pay fixation:
+      30-06-2026 current basic -> corresponding 2026 scale.
+      Difference from current basic is added to the starting step.
+      If resulting amount is not an exact step, next higher step applies.
+    */
     var fixedNew = fixNewBasic(oldArr, newArr, basic);
-    var fullIncrement = fixedNew - basic;
+    var fullIncrement = Math.max(0, fixedNew - basic);
+
     var factor = phase.f(grade);
     var newBasic = Math.round(basic + factor * fullIncrement);
     var diff = newBasic - basic;
+    var increasePct = basic > 0 ? (fullIncrement / basic) * 100 : 0;
 
-    var houseRentFrozen = (phaseId === "july_2026" || phaseId === "jan_2027" || phaseId === "july_2027");
-    var hr = houseRentFrozen ? oldHouseRent(basic, loc) : newHouseRent(grade, newBasic, loc);
+    /* New allowance rates under SRO 347 apply from 01-01-2028. */
+    var newAllowancePhase = (phaseId === "july_2028");
 
+    /* House rent: old rate until 31-12-2027, Gazette 2026 rate from 01-01-2028. */
+    var hr = newAllowancePhase
+      ? newHouseRent(grade, newBasic, loc)
+      : oldHouseRent(basic, loc);
+
+    /* Medical allowance: old rate before 01-01-2028; new Gazette rate from 01-01-2028. */
     var ageSel = document.getElementById("ageGroup");
     var ageGrp = ageSel ? ageSel.value : "under50";
-    var med = ageGrp === "over50" ? 4000 : 3000;
+    var med = newAllowancePhase
+      ? (ageGrp === "over50" ? 4000 : 3000)
+      : 1500;
 
-    var childCount = num("eduAllowance");
-    var edu = Math.min(childCount, 2) * 500;
+    /* Education allowance: Tk 500/child, max 2; Gazette age limit 23. */
+    var childCount = Math.min(2, Math.max(0, Math.floor(num("eduAllowance"))));
+    var c1 = document.getElementById("child1Age");
+    var c2 = document.getElementById("child2Age");
+    var a1 = c1 && c1.value !== "" ? parseFloat(c1.value) : null;
+    var a2 = c2 && c2.value !== "" ? parseFloat(c2.value) : null;
 
-    var tiffin = (grade >= 11 && grade <= 20) ? 500 : 0;
-    var wash = (grade >= 13 && grade <= 20) ? 100 : 0;
+    var agesProvided = (a1 !== null || a2 !== null);
+    var eligibleChildren = childCount;
 
+    if (agesProvided) {
+      var ages = [a1, a2].filter(function(v){ return v !== null && !isNaN(v); });
+      eligibleChildren = Math.min(childCount, ages.filter(function(v){ return v <= 23; }).length);
+    }
+
+    var edu = eligibleChildren * 500;
+
+    /* Tiffin: old Tk 200; new Gazette Tk 500, Grades 11-20. */
+    var tiffin = (grade >= 11 && grade <= 20)
+      ? (newAllowancePhase ? 500 : 200)
+      : 0;
+
+    /* Transport: old Tk 300 for Grades 11-20 in city corporation;
+       new Gazette Tk 600 for Grades 11-20. */
+    var transport = (grade >= 11 && grade <= 20)
+      ? (newAllowancePhase
+          ? (loc !== "district_upazila" ? 600 : 0)
+          : (loc !== "district_upazila" ? 300 : 0))
+      : 0;
+
+    /* Mobile: new Gazette rate from 01-01-2028 only. */
+    var mobile = newAllowancePhase
+      ? (grade <= 5 ? 500 : 150)
+      : 0;
+
+    /* Keep existing user-controlled annual/other fields unchanged. */
     var festival = num("festivalBonus");
     var exgratia = num("exGratia");
 
-    var gross = Math.round(newBasic + hr + med + edu + festival + exgratia + tiffin + wash);
+    /* Keep existing washing logic untouched for applicable cases. */
+    var wash = (grade >= 13 && grade <= 20) ? 100 : 0;
+
+    var gross = Math.round(
+      newBasic + hr + med + edu + festival + exgratia + tiffin + wash + transport + mobile
+    );
 
     var gpfPct = num("gpfPct");
     var gpf = Math.round(newBasic * (gpfPct / 100));
@@ -740,8 +853,12 @@
     var personalLoan = num("personalLoan");
     var benevolent = num("benevolent");
     var revenue = num("revenue");
+
     var totalDeduct = gpf + houseLoan + mclLoan + computerLoan + personalLoan + benevolent + revenue;
     var net = Math.round(gross - totalDeduct);
+
+    /* Bengali New Year allowance is annual, not monthly gross. */
+    var boishakhi = Math.round(newBasic * 0.15);
 
     document.getElementById("emptyState").style.display = "none";
     document.getElementById("resultContent").classList.add("show");
@@ -757,10 +874,43 @@
     document.getElementById("bd-tiffin").textContent = tk(tiffin);
     document.getElementById("bd-washing").textContent = tk(wash);
     document.getElementById("totalSalary").textContent = tk(gross);
-    document.getElementById("incText").textContent = "মূল বেতন বৃদ্ধি (" + phase.l(grade) + "): + ৳ " + bn(diff);
+
+    document.getElementById("incText").textContent =
+      "গেজেট অনুযায়ী বৃদ্ধি (" + phase.l(grade) + "): + ৳ " + bn(diff);
+
     document.getElementById("phaseBadge").textContent = phase.b;
+
     document.getElementById("infoNote").textContent =
-      "গ্রেড " + grade + " • " + meta.t + " • জাতীয় বেতনস্কেল ২০২৬ (SRO 347-আইন/২০২৬) অনুযায়ী নির্ধারিত • " + phase.l(grade) + " কার্যকর।";
+      "গ্রেড " + grade +
+      " • " + meta.t +
+      " • ৩০-০৬-২০২৬ Basic: ৳" + bn(basic) +
+      " • ২০২৬ Corresponding Scale: ৳" + bn(fixedNew) +
+      " • Full increase: " + increasePct.toFixed(2) + "%" +
+      " • কার্যকর: " + phase.l(grade);
+
+    /* Dynamically add Gazette result rows without removing existing rows. */
+    function setExtraRow(id, label, value) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.querySelector(".gazette-extra-label").textContent = label;
+        el.querySelector(".gazette-extra-value").textContent = tk(value);
+      }
+    }
+
+    setExtraRow("gazette-mobile-row", "মোবাইল ভাতা", mobile);
+    setExtraRow("gazette-transport-row", "যাতায়াত ভাতা", transport);
+    setExtraRow("gazette-boishakhi-row", "বাংলা নববর্ষ ভাতা (বার্ষিক)", boishakhi);
+
+    var summary = document.getElementById("gazetteFixationSummary");
+    if (summary) {
+      summary.innerHTML =
+        "<strong>Gazette Pay Fixation Trail</strong><br>" +
+        "৩০-০৬-২০২৬ Basic: <b>৳" + bn(basic) + "</b> → " +
+        "Corresponding ২০২৬ Basic: <b>৳" + bn(fixedNew) + "</b><br>" +
+        "Full difference: <b>৳" + bn(fullIncrement) + "</b> (" +
+        increasePct.toFixed(2) + "%) → " +
+        "এই ধাপে প্রাপ্য Basic: <b>৳" + bn(newBasic) + "</b>";
+    }
 
     document.getElementById("bd-gpf").textContent = tk(gpf);
     document.getElementById("bd-houseLoan").textContent = tk(houseLoan);
@@ -820,19 +970,67 @@
   });
 
   var radios = document.querySelectorAll('input[name="phase"]');
-  for (var i = 0; i < radios.length; i++) { radios[i].addEventListener("change", calc); }
+  for (var i = 0; i < radios.length; i++) {
+    radios[i].addEventListener("change", function() {
+      var d = document.getElementById("gazetteDate");
+      if (d) d.value = this.value;
+      calc();
+    });
+  }
+
+
+  (function ensureGazetteResultRows(){
+    var anchor = document.getElementById("bd-washing");
+    if (!anchor || !anchor.parentNode) return;
+
+    if (!document.getElementById("gazette-mobile-row")) {
+      function row(id, label) {
+        var d = document.createElement("div");
+        d.className = "row";
+        d.id = id;
+        d.innerHTML =
+          '<span class="gazette-extra-label">' + label + '</span>' +
+          '<span class="gazette-extra-value">৳ ০</span>';
+        return d;
+      }
+
+      anchor.parentNode.parentNode.insertBefore(
+        row("gazette-mobile-row", "মোবাইল ভাতা"),
+        anchor.parentNode.nextSibling
+      );
+
+      var mobile = document.getElementById("gazette-mobile-row");
+      mobile.parentNode.insertBefore(
+        row("gazette-transport-row", "যাতায়াত ভাতা"),
+        mobile.nextSibling
+      );
+
+      var transport = document.getElementById("gazette-transport-row");
+      transport.parentNode.insertBefore(
+        row("gazette-boishakhi-row", "বাংলা নববর্ষ ভাতা (বার্ষিক)"),
+        transport.nextSibling
+      );
+    }
+  })();
 
   document.getElementById("pdfBtn").addEventListener("click", function() {
     var grade = document.getElementById("grade").value;
     var gradeText = document.getElementById("grade").selectedOptions[0].textContent;
     var phase = document.getElementById("phaseBadge").textContent;
     var rows = [
+      ["৩০-০৬-২০২৬ বর্তমান Basic", document.getElementById("prevBasic").textContent],
+      ["২০২৬ Corresponding Basic", document.getElementById("gazetteFixationSummary") ? "উপরের fixation trail-এ দেখুন" : "—"],
       ["নতুন মূল বেতন", document.getElementById("bd-basic").textContent],
       ["বাড়ি ভাড়া ভাতা", document.getElementById("bd-house").textContent],
       ["চিকিৎসা ভাতা", document.getElementById("bd-medical").textContent],
       ["শিক্ষা সহায়ক ভাতা", document.getElementById("bd-edu").textContent],
+      ["উৎসব ভাতা", document.getElementById("bd-festival").textContent],
+      ["এককালীন সাহায্য", document.getElementById("bd-exgratia").textContent],
       ["টিফিন ভাতা", document.getElementById("bd-tiffin").textContent],
-      ["ধোয়া-মোছা ভাতা", document.getElementById("bd-washing").textContent]
+      ["ধোয়া-মোছা ভাতা", document.getElementById("bd-washing").textContent],
+      ["মোবাইল ভাতা", document.getElementById("gazette-mobile-row") ? document.querySelector("#gazette-mobile-row .gazette-extra-value").textContent : "৳ ০"],
+      ["যাতায়াত ভাতা", document.getElementById("gazette-transport-row") ? document.querySelector("#gazette-transport-row .gazette-extra-value").textContent : "৳ ০"],
+      ["বাংলা নববর্ষ ভাতা (বার্ষিক)", document.getElementById("gazette-boishakhi-row") ? document.querySelector("#gazette-boishakhi-row .gazette-extra-value").textContent : "৳ ০"]
     ];
     var deductRows = [
       ["জিপিএফ কর্তন", document.getElementById("bd-gpf").textContent],
@@ -908,6 +1106,7 @@
   updateClock();
   setInterval(updateClock, 1000);
 
+  ensureGazetteUI();
   fillBasicOptions();
   buildGradeList();
   calc();
