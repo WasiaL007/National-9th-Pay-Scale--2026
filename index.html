@@ -294,6 +294,7 @@
                 <input type="number" id="basicCustom" placeholder="কাস্টম বেতন লিখুন" min="1000" step="10" inputmode="numeric">
               </div>
               <p class="hint" id="gradeHint">৯ম গ্রেডের প্রারম্ভিক: ৳২২,০০০ (২০১৫) → ৳৪৪,০০০ (২০২৬)</p>
+              <p class="hint" id="fullScaleDisplay" style="color:#0d9488;font-weight:600"></p>
             </div>
 
             <div class="form-group">
@@ -314,16 +315,16 @@
                   </div>
                 </label>
                 <label class="phase-item">
-                  <input type="radio" name="phase" value="july_2027" disabled>
+                  <input type="radio" name="phase" value="july_2027">
                   <div class="info">
-                    <div class="title"><span>৩য় পর্যায়</span><span class="badge">শীঘ্রই</span></div>
+                    <div class="title"><span>৩য় পর্যায়</span><span class="badge">১০০%</span></div>
                     <div class="period">জুলাই ২০২৭</div>
                   </div>
                 </label>
                 <label class="phase-item">
-                  <input type="radio" name="phase" value="july_2028" disabled>
+                  <input type="radio" name="phase" value="july_2028">
                   <div class="info">
-                    <div class="title"><span>৪র্থ পর্যায়</span><span class="badge">শীঘ্রই</span></div>
+                    <div class="title"><span>৪র্থ পর্যায়</span><span class="badge">১০০%</span></div>
                     <div class="period">জানুয়ারি ২০২৮</div>
                   </div>
                 </label>
@@ -331,9 +332,9 @@
             </div>
 
             <div class="form-group">
-              <label for="eduAllowance">শিক্ষা ভাতা (Education Allowance)</label>
-              <input type="number" id="eduAllowance" placeholder="৳ ০" min="0" step="1" inputmode="numeric" value="0">
-              <p class="hint">সন্তান/শিক্ষা বাবদ মাসিক ভাতা — গ্রস বেতনে যোগ হবে।</p>
+              <label for="eduAllowance">সন্তান সংখ্যা (শিক্ষা সহায়ক ভাতা)</label>
+              <input type="number" id="eduAllowance" placeholder="০" min="0" max="2" step="1" inputmode="numeric" value="0">
+              <p class="hint">প্রতি সন্তান ৳৫০০ হারে, সর্বোচ্চ ২ সন্তান পর্যন্ত (গ্রস বেতনে যোগ হবে)।</p>
             </div>
 
             <div class="form-group">
@@ -363,6 +364,13 @@
         <div class="card">
           <div class="card-header indigo"><span>🏦</span> GPF ও ঋণ কর্তন</div>
           <div class="card-body">
+            <div class="form-group">
+              <label for="ageGroup">বয়স (মেডিকেল ভাতার জন্য)</label>
+              <select id="ageGroup">
+                <option value="under50">৫০ বছরের নিচে (৳৩,০০০)</option>
+                <option value="over50">৫০ বছর বা তদূর্ধ্ব (৳৪,০০০)</option>
+              </select>
+            </div>
             <div class="form-group">
               <label for="gpfPct">জিপিএফ কর্তনের হার (GPF Percentage)</label>
               <select id="gpfPct">
@@ -518,7 +526,6 @@
   </div>
 
 <script>
-  // 2015 Pay Scale Steps (unchanged)
   var STEPS_2015 = {
     1:  [78000],
     2:  [66000,68480,71050,73720,76490],
@@ -540,6 +547,29 @@
     18: [8800,9240,9710,10200,10710,11250,11820,12420,13050,13710,14400,15120,15880,16680,17520,18400,19320,20290,21310],
     19: [8500,8930,9380,9850,10350,10870,11420,12000,12600,13230,13900,14600,15330,16100,16910,17760,18650,19590,20570],
     20: [8250,8670,9110,9570,10050,10560,11090,11550,12240,12860,13510,14190,14900,15650,16440,17270,18180,19050,20010]
+  };
+
+  var STEPS_2026 = {
+    1:  [156000],
+    2:  [132000,135700,139400,143200,147200,151200,153000],
+    3:  [113000,117000,121100,125300,129700,134300,139000,143800,148800],
+    4:  [100000,103500,107200,110900,114800,118800,123000,127300,131700,136300,142400],
+    5:  [86000,89500,93100,96800,100700,104700,108800,113200,117700,122400,127400,132400,139700],
+    6:  [71000,74600,78300,82200,86400,90700,95200,100000,104800,110200,115700,121500,127600,134000],
+    7:  [58000,60900,64000,67200,70500,74100,77800,81700,85700,90000,94500,99200,104200,109400,114800,120600,126800],
+    8:  [46000,48300,50800,53300,56000,58800,61700,64800,68000,71400,75000,78700,82700,86700,91100,95700,100500,105500,110800],
+    9:  [44000,46200,48600,51000,53500,56200,59000,62000,65100,68300,71700,75300,79100,83000,87200,91500,96100,100600,105600],
+    10: [32000,33600,35300,37100,38900,40900,42900,45100,47300,49700,52200,54800,57500,60400,63400,66600,69900,73400,77300],
+    11: [25000,26300,27600,29000,30800,32000,33600,35200,37000,38800,40800,42800,44900,47200,49500,52000,54600,57300,60500],
+    12: [24300,25600,26800,28200,29600,31100,32600,34200,36000,37700,39600,41600,43700,45900,48200,50600,53100,55700,58700],
+    13: [24000,25200,26500,27800,29200,30700,32200,33800,35500,37300,39100,41100,43200,45300,47600,49900,52400,55100,58000],
+    14: [23500,24700,26000,27300,28600,30000,31500,33100,34800,36500,38300,40200,42300,44400,46600,48900,51300,53900,56600],
+    15: [22800,24000,25200,26400,27800,29100,30600,32100,33700,35400,37200,39000,41000,43000,45200,47400,49800,52300,55200],
+    16: [21900,23000,24200,25400,26700,28000,29400,30900,32400,34000,35700,37500,39400,41300,43400,45600,47900,50200,52900],
+    17: [21400,22500,23600,24800,26100,27400,28700,30200,31700,33200,34900,36700,38500,40800,42800,44800,46800,49100,51900],
+    18: [21000,22100,23200,24400,25600,26900,28200,29600,31100,32600,34300,36000,37800,39600,41600,43700,45900,48200,50900],
+    19: [20500,21600,22700,23800,25000,26200,27500,28900,30300,31900,33400,35100,36900,38700,40600,42700,44800,47000,49600],
+    20: [20000,21000,22100,23200,24400,25600,26900,28200,29600,31100,32600,34300,36000,37800,39600,41600,43700,45900,48400]
   };
 
   var META = {
@@ -568,8 +598,8 @@
   var PHASES = {
     july_2026: { f: function(gr){ return gr<=9 ? 0.4 : 0.5; }, l: function(gr){ return gr<=9 ? "৪০%" : "৫০%"; }, b: "১ম ধাপ (৪০%/৫০%)" },
     jan_2027:  { f: function(gr){ return gr<=9 ? 0.7 : 0.75; }, l: function(gr){ return gr<=9 ? "৭০%" : "৭৫%"; }, b: "২য় ধাপ (৭০%/৭৫%)" },
-    july_2027: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "শীঘ্রই কার্যকর" },
-    july_2028: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "শীঘ্রই কার্যকর" }
+    july_2027: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "৩য় ধাপ (১০০%)" },
+    july_2028: { f: function(){ return 1; }, l: function(){ return "১০০%"; }, b: "৪র্থ ধাপ (১০০% + নতুন বাড়িভাড়া)" }
   };
 
   function bn(n) {
@@ -579,7 +609,20 @@
   function tk(n) { return "৳ " + bn(n); }
   function num(id) { return parseFloat(document.getElementById(id).value) || 0; }
 
-  function houseRent(basic, loc) {
+  function fixNewBasic(oldArr, newArr, basic) {
+    if (newArr.length === 1) return newArr[0];
+    var oldFirst = oldArr[0];
+    var newFirst = newArr[0];
+    var diff = basic - oldFirst;
+    if (diff <= 0) return newFirst;
+    var candidate = newFirst + diff;
+    for (var i = 0; i < newArr.length; i++) {
+      if (newArr[i] >= candidate) return newArr[i];
+    }
+    return newArr[newArr.length - 1];
+  }
+
+  function oldHouseRent(basic, loc) {
     var p = 0;
     if (loc === "dhaka") {
       if (basic <= 9700) p = Math.max(basic * 0.65, 5600);
@@ -598,6 +641,15 @@
       else p = Math.max(basic * 0.35, 13800);
     }
     return Math.round(p);
+  }
+
+  function newHouseRent(grade, basic, loc) {
+    var pct;
+    if (grade >= 16) pct = loc === "dhaka" ? 0.60 : (loc === "other_city" ? 0.50 : 0.45);
+    else if (grade >= 10) pct = loc === "dhaka" ? 0.50 : (loc === "other_city" ? 0.40 : 0.35);
+    else if (grade >= 5) pct = loc === "dhaka" ? 0.45 : (loc === "other_city" ? 0.35 : 0.30);
+    else pct = loc === "dhaka" ? 0.40 : (loc === "other_city" ? 0.30 : 0.25);
+    return Math.round(basic * pct);
   }
 
   function fillBasicOptions() {
@@ -622,10 +674,12 @@
     document.getElementById("customBasicWrap").classList.remove("show");
     document.getElementById("basicCustom").value = "";
 
-    var meta = META[grade];
-    if (meta) {
+    var newArr = STEPS_2026[grade] || [];
+    if (newArr.length) {
       document.getElementById("gradeHint").textContent =
-        grade + "ম গ্রেডের প্রারম্ভিক: ৳" + bn(steps[0]) + " (২০১৫) → ৳" + bn(meta.s26) + " (২০২৬)";
+        grade + "ম গ্রেডের প্রারম্ভিক: ৳" + bn(steps[0]) + " (২০১৫) → ৳" + bn(newArr[0]) + " (২০২৬)";
+      var fsd = document.getElementById("fullScaleDisplay");
+      if (fsd) fsd.textContent = "২০২৬ পূর্ণ স্কেল: ৳" + newArr.map(bn).join(" - ৳");
     }
   }
 
@@ -645,30 +699,41 @@
 
     var meta = META[grade];
     var phase = PHASES[phaseId];
-    var steps = STEPS_2015[grade] || [];
+    var oldArr = STEPS_2015[grade] || [];
+    var newArr = STEPS_2026[grade] || [];
 
-    if (!meta || !phase || basic <= 0) {
+    if (!meta || !phase || !newArr.length || basic <= 0) {
       document.getElementById("emptyState").style.display = "block";
       document.getElementById("resultContent").classList.remove("show");
       return;
     }
 
+    var fixedNew = fixNewBasic(oldArr, newArr, basic);
+    var fullIncrement = fixedNew - basic;
     var factor = phase.f(grade);
-    var increase = Math.round(steps[0] * meta.g * factor * 10) / 10;
-    var newBasic = Math.round((basic + increase) * 10) / 10;
-    var hr = houseRent(basic, loc);
-    var med = 1500;
-    var tiffin = (grade >= 13 && grade <= 20) ? 200 : 0;
-    var wash = (grade >= 13 && grade <= 20) ? 100 : 0;
-    var edu = num("eduAllowance");
-    var festival = num("festivalBonus");
-    var exgratia = num("exGratia");
-    var gross = Math.round((newBasic + hr + med + tiffin + wash + edu + festival + exgratia) * 10) / 10;
+    var newBasic = Math.round(basic + factor * fullIncrement);
     var diff = newBasic - basic;
 
-    // ===== GPF & Loan deductions =====
+    var houseRentFrozen = (phaseId === "july_2026" || phaseId === "jan_2027" || phaseId === "july_2027");
+    var hr = houseRentFrozen ? oldHouseRent(basic, loc) : newHouseRent(grade, newBasic, loc);
+
+    var ageSel = document.getElementById("ageGroup");
+    var ageGrp = ageSel ? ageSel.value : "under50";
+    var med = ageGrp === "over50" ? 4000 : 3000;
+
+    var childCount = num("eduAllowance");
+    var edu = Math.min(childCount, 2) * 500;
+
+    var tiffin = (grade >= 11 && grade <= 20) ? 500 : 0;
+    var wash = (grade >= 13 && grade <= 20) ? 100 : 0;
+
+    var festival = num("festivalBonus");
+    var exgratia = num("exGratia");
+
+    var gross = Math.round(newBasic + hr + med + edu + festival + exgratia + tiffin + wash);
+
     var gpfPct = num("gpfPct");
-    var gpf = Math.round(basic * (gpfPct / 100));
+    var gpf = Math.round(newBasic * (gpfPct / 100));
     var houseLoan = num("houseLoan");
     var mclLoan = num("mclLoan");
     var computerLoan = num("computerLoan");
@@ -676,7 +741,7 @@
     var benevolent = num("benevolent");
     var revenue = num("revenue");
     var totalDeduct = gpf + houseLoan + mclLoan + computerLoan + personalLoan + benevolent + revenue;
-    var net = Math.round((gross - totalDeduct) * 10) / 10;
+    var net = Math.round(gross - totalDeduct);
 
     document.getElementById("emptyState").style.display = "none";
     document.getElementById("resultContent").classList.add("show");
@@ -695,7 +760,7 @@
     document.getElementById("incText").textContent = "মূল বেতন বৃদ্ধি (" + phase.l(grade) + "): + ৳ " + bn(diff);
     document.getElementById("phaseBadge").textContent = phase.b;
     document.getElementById("infoNote").textContent =
-      "গ্রেড " + grade + " • " + meta.t + " • প্রারম্ভিক বৃদ্ধি হার " + meta.r + " এর " + phase.l(grade) + " কার্যকর। চূড়ান্ত গেজেট প্রকাশের পর পরিবর্তন হতে পারে।";
+      "গ্রেড " + grade + " • " + meta.t + " • জাতীয় বেতনস্কেল ২০২৬ (SRO 347-আইন/২০২৬) অনুযায়ী নির্ধারিত • " + phase.l(grade) + " কার্যকর।";
 
     document.getElementById("bd-gpf").textContent = tk(gpf);
     document.getElementById("bd-houseLoan").textContent = tk(houseLoan);
@@ -715,23 +780,24 @@
     var html = "";
     for (var g = 1; g <= 20; g++) {
       var meta = META[g];
-      var steps = STEPS_2015[g];
-      if (!meta || !steps) continue;
-      var start2015 = steps[0];
-      var inc = Math.round(start2015 * meta.g);
+      var oldArr = STEPS_2015[g];
+      var newArr = STEPS_2026[g];
+      if (!meta || !oldArr || !newArr) continue;
+      var start2015 = oldArr[0];
+      var start2026 = newArr[0];
+      var inc = start2026 - start2015;
       html += '<div class="grade-row">'
         + '<div class="grade-top"><span class="grade-num">' + g + 'ম গ্রেড</span><span class="grade-type">' + meta.t + '</span></div>'
         + '<div class="grade-grid">'
         + '<div class="g-item"><span class="g-lbl">২০১৫ প্রারম্ভিক</span><span class="g-val">৳ ' + bn(start2015) + '</span></div>'
-        + '<div class="g-item"><span class="g-lbl">পূর্ণ বৃদ্ধি</span><span class="g-val pct">' + meta.r + '</span></div>'
-        + '<div class="g-item"><span class="g-lbl">জুলাই-২৬ বৃদ্ধি</span><span class="g-val up">+৳ ' + bn(inc) + '</span></div>'
-        + '<div class="g-item"><span class="g-lbl">২০২৬ প্রারম্ভিক</span><span class="g-val new">৳ ' + bn(meta.s26) + '</span></div>'
+        + '<div class="g-item"><span class="g-lbl">২০২৬ প্রারম্ভিক</span><span class="g-val new">৳ ' + bn(start2026) + '</span></div>'
+        + '<div class="g-item"><span class="g-lbl">মোট বৃদ্ধি</span><span class="g-val up">+৳ ' + bn(inc) + '</span></div>'
+        + '<div class="g-item"><span class="g-lbl">নতুন স্কেলে ধাপ</span><span class="g-val pct">' + newArr.length + 'টি</span></div>'
         + '</div></div>';
     }
     wrap.innerHTML = html;
   }
 
-  // Events
   document.getElementById("grade").addEventListener("change", function() { fillBasicOptions(); calc(); });
   document.getElementById("basicSelect").addEventListener("change", function() {
     if (this.value === "custom") {
@@ -745,11 +811,12 @@
   document.getElementById("basicCustom").addEventListener("input", calc);
   document.getElementById("location").addEventListener("change", calc);
   document.getElementById("eduAllowance").addEventListener("input", calc);
-  document.getElementById("festivalBonus").addEventListener("input", calc);
-  document.getElementById("exGratia").addEventListener("input", calc);
   document.getElementById("gpfPct").addEventListener("change", calc);
-  ["houseLoan","mclLoan","computerLoan","personalLoan","benevolent","revenue"].forEach(function(id){
-    document.getElementById(id).addEventListener("input", calc);
+  var ageSelEl = document.getElementById("ageGroup");
+  if (ageSelEl) ageSelEl.addEventListener("change", calc);
+  ["houseLoan","mclLoan","computerLoan","personalLoan","benevolent","revenue","festivalBonus","exGratia"].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener("input", calc);
   });
 
   var radios = document.querySelectorAll('input[name="phase"]');
@@ -763,7 +830,7 @@
       ["নতুন মূল বেতন", document.getElementById("bd-basic").textContent],
       ["বাড়ি ভাড়া ভাতা", document.getElementById("bd-house").textContent],
       ["চিকিৎসা ভাতা", document.getElementById("bd-medical").textContent],
-      ["শিক্ষা ভাতা", document.getElementById("bd-edu").textContent],
+      ["শিক্ষা সহায়ক ভাতা", document.getElementById("bd-edu").textContent],
       ["টিফিন ভাতা", document.getElementById("bd-tiffin").textContent],
       ["ধোয়া-মোছা ভাতা", document.getElementById("bd-washing").textContent]
     ];
@@ -799,7 +866,7 @@
       '.ft{text-align:center;font-size:10px;color:#94a3b8;margin-top:20px}' +
       '@media print{body{padding:10px}}' +
       '</style></head><body>' +
-      '<div class="hd"><h1>জাতীয় বেতন স্কেল ২০২৬ — বেতন হিসাব রিপোর্ট</h1><p>Wasi Al · ৯ম পে স্কেল ক্যালকুলেটর</p></div>' +
+      '<div class="hd"><h1>জাতীয় বেতনস্কেল ২০২৬ — বেতন হিসাব রিপোর্ট</h1><p>Wasi Al Enterprise · SRO 347-আইন/২০২৬ অনুযায়ী</p></div>' +
       '<div class="meta"><span>গ্রেড: <b>' + gradeText + '</b></span><span>ধাপ: <b>' + phase + '</b></span></div>' +
       '<div class="sec-title">বেতন বিবরণ</div>' +
       '<table>' + rowsHtml + '</table>' +
@@ -807,20 +874,18 @@
       '<div class="sec-title">কর্তন বিবরণ</div>' +
       '<table>' + deductHtml + '<tr><td><b>মোট কর্তন</b></td><td class="amt deduct"><b>' + document.getElementById("bd-totalDeduct").textContent + '</b></td></tr></table>' +
       '<div class="totalbox netbox"><div class="l">নেট বেতন (Net Take-Home Pay)</div><div class="v">' + document.getElementById("netSalary").textContent + '</div></div>' +
-      '<div class="ft">শুধুমাত্র তথ্যমূলক উদ্দেশ্যে · অফিসিয়াল গেজেট অনুসরণ করুন · © ২০২৬ Wasi Al</div>' +
+      '<div class="ft">শুধুমাত্র তথ্যমূলক উদ্দেশ্যে · অফিসিয়াল পে ফিক্সেশন স্টেটমেন্ট চূড়ান্ত · © ২০২৬ Wasi Al Enterprise</div>' +
       '</body></html>'
     );
     win.document.close();
     setTimeout(function(){ win.print(); }, 300);
   });
 
-  // Splash screen controls
   function dismissSplash() { document.getElementById("splash").classList.add("hide"); }
   document.getElementById("splashStart").addEventListener("click", dismissSplash);
   document.getElementById("splashSkip").addEventListener("click", dismissSplash);
   setTimeout(dismissSplash, 4000);
 
-  // ===== Live Bengali date & time =====
   var BN_DAYS = ["রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার","শনিবার"];
   var BN_MONTHS = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
   function toBnDigits(n) { return String(n).replace(/\d/g, function(d){ return "০১২৩৪৫৬৭৮৯"[d]; }); }
@@ -843,7 +908,6 @@
   updateClock();
   setInterval(updateClock, 1000);
 
-  // Init
   fillBasicOptions();
   buildGradeList();
   calc();
